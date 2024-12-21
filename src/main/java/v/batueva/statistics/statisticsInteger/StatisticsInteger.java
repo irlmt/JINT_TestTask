@@ -1,4 +1,4 @@
-package v.batueva.statistics;
+package v.batueva.statistics.statisticsInteger;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

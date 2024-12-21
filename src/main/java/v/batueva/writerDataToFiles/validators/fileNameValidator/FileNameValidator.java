@@ -1,4 +1,4 @@
-package v.batueva.writerDataToFiles.validators;
+package v.batueva.writerDataToFiles.validators.fileNameValidator;
 
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.ParameterException;

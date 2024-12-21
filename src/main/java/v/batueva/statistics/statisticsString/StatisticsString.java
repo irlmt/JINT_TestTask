@@ -1,4 +1,4 @@
-package v.batueva.statistics;
+package v.batueva.statistics.statisticsString;
 
 public class StatisticsString {
     static private int counter = 0;
