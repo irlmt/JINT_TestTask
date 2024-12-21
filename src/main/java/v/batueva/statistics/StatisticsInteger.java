@@ -2,6 +2,7 @@ package v.batueva.statistics;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 public class StatisticsInteger {
     private static int counter = 0;
@@ -21,7 +22,7 @@ public class StatisticsInteger {
     }
     public static void printFullStatistics(){
         if(counter!=0){
-            averageValue = new BigDecimal(sumOfValues).divide(BigDecimal.valueOf(counter));
+            averageValue = new BigDecimal(sumOfValues).divide(BigDecimal.valueOf(counter), 2, RoundingMode.HALF_EVEN);
         }
         System.out.println("Number of integer values: " + counter);
         System.out.println("Max. integer value: " + maxValue);

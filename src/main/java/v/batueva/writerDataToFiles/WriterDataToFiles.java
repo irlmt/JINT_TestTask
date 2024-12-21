@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 public class WriterDataToFiles {
     @Parameter(names = "-o", description = "path for result files names", arity = 1, validateWith = NotCommandValidator.class)
@@ -53,28 +54,40 @@ public class WriterDataToFiles {
     public void run(String[] args) {
         try {
             jCommander.parse(args);
-            writeDataToFile(readDataFromFile());
+            writeDataToFile();
             printStatistics();
         } catch (ParameterException e) {
             System.out.println("Wrong arguments");
         }
     }
 
-    private void writeDataToFile(List<String> dataToWrite) {
+    private void writeDataToFile() {
+        List<String> dataToWrite = readDataFromFile();
         if (isAddToExisting) {
             writeListToFile(dataToWrite);
         } else {
-            File fileIntegers = new File(filesPrefix + INTEGER_FILE_NAME);
-            fileIntegers.delete();
-            File fileFloats = new File(filesPrefix + FLOAT_FILE_NAME);
-            fileFloats.delete();
-            File fileStrings = new File(filesPrefix + STRING_FILE_NAME);
-            fileStrings.delete();
-            writeListToFile(dataToWrite);
+            try{
+                File fileIntegers = new File(filesPrefix + INTEGER_FILE_NAME);
+                fileIntegers.delete();
+                File fileFloats = new File(filesPrefix + FLOAT_FILE_NAME);
+                fileFloats.delete();
+                File fileStrings = new File(filesPrefix + STRING_FILE_NAME);
+                fileStrings.delete();
+                writeListToFile(dataToWrite);
+            }
+            catch (SecurityException e){
+                System.out.println("Couldn't delete file");
+            }
+            catch (NullPointerException e){
+                System.out.println("Couldn't open file");
+            }
+            catch (PatternSyntaxException e){
+                System.out.println("Wrong pattern");
+            }
         }
     }
 
-    private void writeListToFile(List<String> dataToWrite) {
+    private void writeListToFile(List<String> dataToWrite) throws PatternSyntaxException {
         for (String data : dataToWrite) {
             if (data.matches(regexInteger)) {
                 StatisticsInteger.addValue(BigInteger.valueOf(Long.parseLong(data)));
@@ -94,7 +107,7 @@ public class WriterDataToFiles {
             writerDataToFile.write(data + '\n');
             writerDataToFile.flush();
         } catch (IOException e) {
-            System.out.println("File Not Found");
+            System.out.println("I/O error occured");
         }
     }
 
