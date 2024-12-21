@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 public class DataParser {
-    @Parameter(names = "-o", description = "path for result files names", arity = 1, validateWith = NotCommandValidator.class)
+    @Parameter(names = "-o", description = "path for result files", arity = 1, validateWith = NotCommandValidator.class)
     private String filesPath = "";
 
     @Parameter(names = "-p", description = "prefix for result files names", arity = 1, validateWith = NotCommandValidator.class)
@@ -53,11 +53,11 @@ public class DataParser {
     private void writeDataToFiles() {
         if (!isAddToExisting) {
             try {
-                File fileIntegers = new File(filesPrefix + INTEGER_FILE_NAME);
+                File fileIntegers = new File(filesPath + '\\' + filesPrefix + INTEGER_FILE_NAME);
                 fileIntegers.delete();
-                File fileFloats = new File(filesPrefix + FLOAT_FILE_NAME);
+                File fileFloats = new File(filesPath + '\\' + filesPrefix + FLOAT_FILE_NAME);
                 fileFloats.delete();
-                File fileStrings = new File(filesPrefix + STRING_FILE_NAME);
+                File fileStrings = new File(filesPath + '\\' + filesPrefix + STRING_FILE_NAME);
                 fileStrings.delete();
             } catch (SecurityException e) {
                 System.out.println("Couldn't delete file");
@@ -69,18 +69,18 @@ public class DataParser {
         }
         for (String fileName : filesNames) {
             try (BufferedReader in = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(filesPath + '\\' + fileName)))) {
+                    new FileInputStream(fileName)))) {
                 String line;
                 while ((line = in.readLine()) != null) {
                     if (line.matches(regexInteger)) {
                         StatisticsInteger.addValue(BigInteger.valueOf(Long.parseLong(line)));
-                        writeStringToFile(filesPrefix + INTEGER_FILE_NAME, line);
+                        writeStringToFile(filesPath + '\\' + filesPrefix + INTEGER_FILE_NAME, line);
                     } else if (line.matches(regexFloat)) {
                         StatisticsFloat.addValue(BigDecimal.valueOf(Double.parseDouble(line)));
-                        writeStringToFile(filesPrefix + FLOAT_FILE_NAME, line);
+                        writeStringToFile(filesPath + '\\' + filesPrefix + FLOAT_FILE_NAME, line);
                     } else {
                         StatisticsString.addValue(line);
-                        writeStringToFile(filesPrefix + STRING_FILE_NAME, line);
+                        writeStringToFile(filesPath + '\\' + filesPrefix + STRING_FILE_NAME, line);
                     }
                 }
             } catch (IOException e) {
