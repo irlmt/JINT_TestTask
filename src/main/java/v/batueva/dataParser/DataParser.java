@@ -8,13 +8,7 @@ import v.batueva.statistics.statisticsString.StatisticsString;
 import v.batueva.writerDataToFiles.validators.fileNameValidator.FileNameValidator;
 import v.batueva.writerDataToFiles.validators.notCommandValidator.NotCommandValidator;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -46,18 +40,62 @@ public class DataParser {
     private final String STRING_FILE_NAME = "strings.txt";
 
     public void parse() {
-        writeDataToFiles();
+        try {
+            writeDataToFiles();
+        } catch (IOException e) {
+            System.out.println("Couldnt close file");
+        }
         printStatistics();
     }
 
-    private void writeDataToFiles() {
+    private void writeDataToFiles() throws IOException {
+        checkWriteToExisting();
+        List<BufferedReader> readers = new ArrayList<>();
+        try {
+            for (String fileName : filesNames) {
+                readers.add(new BufferedReader(new InputStreamReader(new FileInputStream(fileName))));
+            }
+            boolean notEmpty = true;
+            while (notEmpty) {
+                notEmpty = false;
+                for (BufferedReader in : readers) {
+                    String line;
+                    if ((line = in.readLine()) != null) {
+                        matchDataType(line);
+                        notEmpty = true;
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Input file not found");
+        } catch (IOException e) {
+            System.out.println("Couldn't write to file");
+        } catch (NullPointerException e) {
+            System.out.println("Empty string");
+        } catch (NumberFormatException e) {
+            System.out.println("Wrong number format");
+        } catch (PatternSyntaxException e) {
+            System.out.println("Wrong pattern");
+        } finally {
+            for (BufferedReader in : readers) {
+                if (in != null) {
+                    in.close();
+                }
+            }
+        }
+    }
+
+    private void checkWriteToExisting() {
+        if(!filesPath.equals("")){
+            filesPath = filesPath + '\\';
+        }
         if (!isAddToExisting) {
             try {
-                File fileIntegers = new File(filesPath + '\\' + filesPrefix + INTEGER_FILE_NAME);
+                File fileIntegers = new File(filesPath + filesPrefix + INTEGER_FILE_NAME);
                 fileIntegers.delete();
-                File fileFloats = new File(filesPath + '\\' + filesPrefix + FLOAT_FILE_NAME);
+                File fileFloats = new File(filesPath + filesPrefix + FLOAT_FILE_NAME);
                 fileFloats.delete();
-                File fileStrings = new File(filesPath + '\\' + filesPrefix + STRING_FILE_NAME);
+                File fileStrings = new File(filesPath + filesPrefix + STRING_FILE_NAME);
                 fileStrings.delete();
             } catch (SecurityException e) {
                 System.out.println("Couldn't delete file");
@@ -67,31 +105,18 @@ public class DataParser {
                 System.out.println("Wrong pattern");
             }
         }
-        for (String fileName : filesNames) {
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(fileName)))) {
-                String line;
-                while ((line = in.readLine()) != null) {
-                    if (line.matches(regexInteger)) {
-                        StatisticsInteger.addValue(BigInteger.valueOf(Long.parseLong(line)));
-                        writeStringToFile(filesPath + '\\' + filesPrefix + INTEGER_FILE_NAME, line);
-                    } else if (line.matches(regexFloat)) {
-                        StatisticsFloat.addValue(BigDecimal.valueOf(Double.parseDouble(line)));
-                        writeStringToFile(filesPath + '\\' + filesPrefix + FLOAT_FILE_NAME, line);
-                    } else {
-                        StatisticsString.addValue(line);
-                        writeStringToFile(filesPath + '\\' + filesPrefix + STRING_FILE_NAME, line);
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("Couldn't find file: " + fileName);
-            } catch (NullPointerException e){
-                System.out.println("Empty string");
-            } catch (NumberFormatException e){
-                System.out.println("Wrong number format");
-            } catch (PatternSyntaxException e){
-                System.out.println("Wrong pattern");
-            }
+    }
+
+    private void matchDataType(String line) throws PatternSyntaxException {
+        if (line.matches(regexInteger)) {
+            StatisticsInteger.addValue(BigInteger.valueOf(Long.parseLong(line)));
+            writeStringToFile(filesPath + filesPrefix + INTEGER_FILE_NAME, line);
+        } else if (line.matches(regexFloat)) {
+            StatisticsFloat.addValue(BigDecimal.valueOf(Double.parseDouble(line)));
+            writeStringToFile(filesPath + filesPrefix + FLOAT_FILE_NAME, line);
+        } else {
+            StatisticsString.addValue(line);
+            writeStringToFile(filesPath + filesPrefix + STRING_FILE_NAME, line);
         }
     }
 
