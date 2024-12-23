@@ -34,7 +34,7 @@ public class DataParser {
     private List<String> filesNames = new ArrayList<>();
     private JCommander jCommander;
     private String regexInteger = "^\\-?\\d+$";
-    private String regexFloat = "^\\-?\\d+\\.\\d+|\\-?\\d+\\.\\d+E\\-\\d+$";
+    private String regexFloat = "^\\-?\\d+\\.\\d+|\\-?\\d+\\.\\d+E[\\-\\+]\\d+$";
     private final String INTEGER_FILE_NAME = "integers.txt";
     private final String FLOAT_FILE_NAME = "floats.txt";
     private final String STRING_FILE_NAME = "strings.txt";
